@@ -39,8 +39,8 @@ class Img_TrainTransform:
         
         self.transforms_list.append(
             v2.Normalize(
-                mean=[0, 0, 0], # placeholder
-                std=[0, 0., 0] # placeholder
+                mean=[1, 1, 1], # placeholder
+                std=[1, 1, 1] # placeholder
                 )
             )        
         self.transform = v2.Compose(self.transforms_list)
@@ -60,8 +60,8 @@ class Img_ValTransform:
             self.transforms_list.append(v2.Resize((self.size, self.size)))
         self.transforms_list.append(
             v2.Normalize(
-                mean=[0, 0, 0], # placeholder
-                std=[0, 0, 0], # placeholder
+                mean=[1, 1, 1], # placeholder
+                std=[1, 1, 1], # placeholder
             )
         )
         self.transform = v2.Compose(self.transforms_list)

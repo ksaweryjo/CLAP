@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 from typing import Callable, List, Optional, Set
 
+import soundfile as sf
 import torch
-import torchaudio
 import torchvision.io as io
 from torch.utils.data import DataLoader, Dataset
 
@@ -31,9 +31,21 @@ class SpokenCocoDataset(Dataset):
             if image_ids is not None and image_id not in image_ids:
                 continue
 
-            img_path = img_dir / record["image"]
+            image_name = Path(record["image"])
+            if image_name.parts[0] == "val2014" or image_name.parts[0] == "train2014" or image_name.parts[0] == "test2014":
+                image_name = Path(*image_name.parts[1:])
+
+            img_path = img_dir / image_name
             for cap in record["captions"]:
-                self.data.append((img_path, audio_dir / cap["wav"], cap["text"]))
+                wav_name = Path(cap["wav"])
+                if wav_name.parts[0] == "wavs":
+                    wav_name = Path(*wav_name.parts[1:])
+
+                if wav_name.parts and wav_name.parts[0] == "val" or wav_name.parts[0] == "train" or wav_name.parts[0] == "test":
+                    wav_name = Path(*wav_name.parts[1:])
+
+                self.data.append((img_path, audio_dir / wav_name, cap["text"]))
+
 
     def __len__(self) -> int:
         return len(self.data)
@@ -45,10 +57,12 @@ class SpokenCocoDataset(Dataset):
         if self.img_transform is not None:
             img = self.img_transform(img)
 
-        audio, sr = torchaudio.load(wav_path)
-        audio = audio.mean(dim=0)  # convert to mono if stereo
+        audio, sr = sf.read(wav_path, dtype="float32", always_2d=True)
+        audio = torch.from_numpy(audio).T.contiguous()
         if self.audio_transform is not None:
-            audio = self.audio_transform(audio)
+            result = self.audio_transform(audio)
+            audio = result[0] if isinstance(result, tuple) else result
+        audio = torch.as_tensor(audio, dtype=torch.float32)
 
         return img, audio, text
 
@@ -63,4 +77,10 @@ if __name__ == "__main__":
         img_transform=Img_TrainTransform(),  
         audio_transform=Audio_TrainTransform()
     )
-    dataloader = DataLoader(dataset, batch_size=64, shuffle=True, num_workers=4)
+
+    dataloader = DataLoader(
+        dataset,
+        batch_size=64,
+        shuffle=False,
+        num_workers=4,
+    )
