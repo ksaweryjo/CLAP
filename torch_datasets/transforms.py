@@ -39,8 +39,8 @@ class Img_TrainTransform:
         
         self.transforms_list.append(
             v2.Normalize(
-                mean=[1, 1, 1], # placeholder
-                std=[1, 1, 1] # placeholder
+                mean=[0.47116698, 0.44670493, 0.40732929],
+                std=[0.27892825, 0.27424563, 0.28907873]
                 )
             )        
         self.transform = v2.Compose(self.transforms_list)
@@ -60,8 +60,8 @@ class Img_ValTransform:
             self.transforms_list.append(v2.Resize((self.size, self.size)))
         self.transforms_list.append(
             v2.Normalize(
-                mean=[1, 1, 1], # placeholder
-                std=[1, 1, 1], # placeholder
+                mean=[0.46761145, 0.44558814, 0.40681093],
+                std=[0.27877759, 0.27342102, 0.28721333]
             )
         )
         self.transform = v2.Compose(self.transforms_list)
@@ -73,7 +73,7 @@ class Audio_TrainTransform:
     def __init__(
         self,
         sample_rate: int = 16000,
-        max_sec: float = 10.0, # placeholder
+        max_sec: float = 9.8133,
         normalize: bool = True,
     ) -> None:
         self.max_samp = int(sample_rate * max_sec)
@@ -97,7 +97,7 @@ class Audio_ValTransform:
     def __init__(
         self,
         sample_rate: int = 16000,
-        max_sec: float = 10.0, # placeholder
+        max_sec: float = 9.6427,
         normalize: bool = True,
     ) -> None:
         self.max_samp = int(sample_rate * max_sec)
